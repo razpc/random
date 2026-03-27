@@ -4,346 +4,450 @@
   <meta charset="UTF-8" />
   <title>OroLabs Protolab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  
   <style>
     :root {
       --bg-color: #121212;
+      --sidebar-bg: #181818;
       --cell-bg: #1e1e1e;
-      --border-color: #333;
+      --toolbar-bg: #212121;
+      --border-color: #3c4043;
       --text-main: #e8eaed;
       --text-muted: #9aa0a6;
       --accent: #8ab4f8;
-      --btn-hover: #303134;
       --run-bg: #238636;
-      --run-hover: #2ea043;
+      --error-red: #ff7b72;
     }
 
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg-color);
       color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    /* Top Navigation */
+    /* Sidebar */
+    .sidebar {
+      width: 60px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+      gap: 20px;
+    }
+
+    .sidebar-icon {
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .sidebar-icon:hover { color: var(--accent); }
+
+    /* Main Container */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    /* Topbar */
     .topbar {
-      background: var(--cell-bg);
-      padding: 12px 24px;
+      background: var(--toolbar-bg);
+      padding: 8px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border-color);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      height: 48px;
     }
 
-    .logo {
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--accent);
+    .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      font-weight: 500;
+      color: var(--accent);
     }
 
-    .actions button {
-      margin-left: 8px;
+    .toolbar-actions { display: flex; gap: 8px; }
+
+    .btn {
       background: transparent;
       border: 1px solid var(--border-color);
-      padding: 6px 16px;
       color: var(--text-main);
+      padding: 4px 12px;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 14px;
-      transition: background 0.2s;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .actions button.primary {
-      background: var(--run-bg);
-      border-color: var(--run-bg);
-      color: white;
-      font-weight: bold;
-    }
+    .btn:hover { background: #303134; }
+    .btn-primary { background: var(--run-bg); border-color: var(--run-bg); color: white; }
+    .btn-primary:hover { background: #2ea043; }
 
-    .actions button:hover {
-      background: var(--btn-hover);
-    }
-
-    .actions button.primary:hover {
-      background: var(--run-hover);
-    }
-
-    /* Notebook Layout */
+    /* Notebook Area */
     .notebook {
-      padding: 40px 20px;
-      max-width: 960px;
-      margin: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      padding: 20px 10%;
+      flex: 1;
     }
 
-    /* Cell Styles */
     .cell {
-      display: flex;
-      background: var(--cell-bg);
+      position: relative;
+      margin-bottom: 24px;
       border-radius: 8px;
+      background: var(--cell-bg);
       border: 1px solid transparent;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-      transition: border 0.2s;
+      transition: border 0.2s, box-shadow 0.2s;
     }
 
-    .cell:focus-within {
+    .cell:hover, .cell:focus-within {
       border-color: var(--border-color);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+
+    .cell-header {
+      display: flex;
+      position: relative;
     }
 
     .cell-gutter {
-      width: 60px;
-      padding: 12px 0;
+      width: 50px;
+      padding-top: 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      border-right: 1px solid transparent;
-    }
-
-    .run-indicator {
-      font-family: monospace;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
     }
 
     .run-btn {
-      background: var(--btn-hover);
-      border: none;
-      border-radius: 50%;
       width: 32px;
       height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: transparent;
       color: var(--text-main);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
-      transition: background 0.2s;
+      font-size: 12px;
     }
 
-    .run-btn:hover {
-      background: var(--run-bg);
-      color: white;
+    .run-btn:hover { background: var(--run-bg); color: white; border-color: var(--run-bg); }
+
+    .execution-count {
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
     }
 
-    .cell-content {
+    .editor-container {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 12px;
+      padding: 12px 12px 12px 0;
       position: relative;
     }
 
-    .cell-content textarea {
+    /* Overlapping Textarea and Code for Highlighting */
+    .editor-container textarea, .editor-container pre {
+      margin: 0;
+      padding: 10px;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 40px;
       width: 100%;
+      box-sizing: border-box;
+      tab-size: 4;
+    }
+
+    .editor-container textarea {
       background: transparent;
-      color: var(--text-main);
+      color: transparent;
+      caret-color: white;
       border: none;
       resize: none;
-      font-family: 'Consolas', 'Monaco', monospace;
-      font-size: 15px;
-      line-height: 1.5;
       outline: none;
+      position: relative;
+      z-index: 2;
+      white-space: pre;
       overflow: hidden;
-      min-height: 40px;
     }
 
-    .cell-controls {
-      display: flex;
-      justify-content: flex-end;
-      opacity: 0;
-      transition: opacity 0.2s;
-      margin-top: 8px;
+    .editor-container pre {
+      position: absolute;
+      top: 12px;
+      left: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: transparent !important;
     }
 
-    .cell:hover .cell-controls {
-      opacity: 1;
+    .cell-actions {
+      position: absolute;
+      top: -15px;
+      right: 10px;
+      background: var(--toolbar-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      display: none;
+      padding: 2px;
+      z-index: 10;
     }
 
-    .delete-btn {
-      background: transparent;
-      border: none;
-      color: #ff7b72;
+    .cell:hover .cell-actions { display: flex; }
+
+    .action-icon {
+      padding: 4px 8px;
       cursor: pointer;
       font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 4px;
+      color: var(--text-muted);
     }
 
-    .delete-btn:hover {
-      background: rgba(255, 123, 114, 0.1);
-    }
+    .action-icon:hover { color: var(--accent); }
 
-    .output {
+    /* Output Section */
+    .output-area {
       background: #0d1117;
-      padding: 12px;
-      border-radius: 4px;
-      margin-top: 12px;
-      font-family: 'Consolas', 'Monaco', monospace;
+      border-top: 1px solid var(--border-color);
+      padding: 12px 12px 12px 50px;
+      font-family: 'Consolas', monospace;
       font-size: 13px;
-      white-space: pre-wrap;
       display: none;
-      border-left: 3px solid var(--accent);
-      color: #c9d1d9;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      white-space: pre-wrap;
     }
 
-    .output.visible {
-      display: block;
-    }
-    
-    .output.error {
-      border-left-color: #ff7b72;
-      color: #ff7b72;
+    .output-area.visible { display: block; }
+    .output-area.error { color: var(--error-red); border-left: 4px solid var(--error-red); }
+    .output-area.success { border-left: 4px solid var(--run-bg); }
+
+    /* Status Bar */
+    .status-bar {
+      height: 24px;
+      background: var(--accent);
+      color: #000;
+      font-size: 11px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      justify-content: space-between;
     }
   </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="logo">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-    OroLabs Protolab
+<div class="sidebar">
+  <div class="sidebar-icon" title="Files">📁</div>
+  <div class="sidebar-icon" title="Variables">📊</div>
+  <div class="sidebar-icon" title="Settings">⚙️</div>
+</div>
+
+<div class="main-wrapper">
+  <div class="topbar">
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+      OroLabs Protolab
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn" onclick="addCodeCell()">+ Code</button>
+      <button class="btn" onclick="clearAllOutputs()">Clear Outputs</button>
+      <button class="btn" onclick="downloadAsPython()">Download .py</button>
+      <button class="btn btn-primary" onclick="runAllCells()">Run All</button>
+    </div>
   </div>
-  <div class="actions">
-    <button onclick="addCell()">+ Code</button>
-    <button class="primary" onclick="runAllCells()">Run All</button>
+
+  <div class="notebook" id="notebook">
+    </div>
+
+  <div class="status-bar">
+    <span>RAM: 0.45GB / 12.69GB</span>
+    <span>Connected: localhost:8000</span>
   </div>
 </div>
 
-<div class="notebook" id="notebook"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
 
 <script>
-// --- Configuration ---
-const API_URL = "http://localhost:8000/run"; // Pointing to your FastAPI server
-const API_KEY = "dev-secret"; // Matching the API_SECRET in your main.py
-
+const API_URL = "http://localhost:8000/run";
+const API_KEY = "dev-secret";
 let executionCounter = 1;
 
-// --- Core Functions ---
-function createCell() {
-  const cell = document.createElement("div");
-  cell.className = "cell";
+// --- Persistence ---
+function saveNotebook() {
+  const cells = [];
+  document.querySelectorAll('.cell').forEach(cell => {
+    cells.push(cell.querySelector('textarea').value);
+  });
+  localStorage.setItem('protolab_cells', JSON.stringify(cells));
+}
 
+function loadNotebook() {
+  const saved = localStorage.getItem('protolab_cells');
+  if (saved) {
+    const cells = JSON.parse(saved);
+    cells.forEach(code => addCodeCell(code));
+  } else {
+    addCodeCell('print("Welcome to OroLabs Protolab!")\n# Shift + Enter to run');
+  }
+}
+
+// --- Cell Creation ---
+function addCodeCell(initialCode = "") {
+  const container = document.getElementById('notebook');
+  const cell = document.createElement('div');
+  cell.className = 'cell';
+  
   cell.innerHTML = `
-    <div class="cell-gutter">
-      <div class="run-indicator">[ ]</div>
-      <button class="run-btn" title="Run cell">▶</button>
+    <div class="cell-actions">
+      <span class="action-icon" onclick="moveCell(this, -1)">▲</span>
+      <span class="action-icon" onclick="moveCell(this, 1)">▼</span>
+      <span class="action-icon" onclick="this.closest('.cell').remove(); saveNotebook();">🗑️</span>
     </div>
-    <div class="cell-content">
-      <textarea placeholder="Write Python code here..."></textarea>
-      <div class="cell-controls">
-        <button class="delete-btn">Delete Cell</button>
+    <div class="cell-header">
+      <div class="cell-gutter">
+        <button class="run-btn" onclick="runSingleCell(this.closest('.cell'))">▶</button>
+        <div class="execution-count">[ ]</div>
       </div>
-      <div class="output"></div>
+      <div class="editor-container">
+        <textarea spellcheck="false" oninput="updateEditor(this)">${initialCode}</textarea>
+        <pre aria-hidden="true"><code class="language-python">${initialCode}</code></pre>
+      </div>
     </div>
+    <div class="output-area"></div>
   `;
 
-  const textarea = cell.querySelector("textarea");
-  const runBtn = cell.querySelector(".run-btn");
-  const deleteBtn = cell.querySelector(".delete-btn");
-
-  // Auto-resize
-  textarea.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = (this.scrollHeight) + 'px';
-  });
-
-  // Shift+Enter to run, Tab to indent
+  container.appendChild(cell);
+  const textarea = cell.querySelector('textarea');
+  updateEditor(textarea);
+  
+  // Keyboard Shortcuts
   textarea.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && e.shiftKey) {
+      e.preventDefault();
+      runSingleCell(cell);
+    }
     if (e.key === 'Tab') {
       e.preventDefault();
       const start = this.selectionStart;
-      const end = this.selectionEnd;
-      this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+      this.value = this.value.substring(0, start) + "    " + this.value.substring(this.selectionEnd);
       this.selectionStart = this.selectionEnd = start + 4;
-    }
-    if (e.key === 'Enter' && e.shiftKey) {
-      e.preventDefault();
-      runCell(cell);
+      updateEditor(this);
     }
   });
 
-  runBtn.addEventListener('click', () => runCell(cell));
-  deleteBtn.addEventListener('click', () => cell.remove());
-
-  return cell;
+  saveNotebook();
 }
 
-function addCell() {
-  const notebook = document.getElementById("notebook");
-  const newCell = createCell();
-  notebook.appendChild(newCell);
-  newCell.querySelector("textarea").focus();
-}
-
-async function runCell(cell) {
-  const code = cell.querySelector("textarea").value.trim();
-  const outputEl = cell.querySelector(".output");
-  const indicator = cell.querySelector(".run-indicator");
+function updateEditor(el) {
+  const code = el.value;
+  const pre = el.nextElementSibling;
+  const codeEl = pre.querySelector('code');
   
-  if (!code) return; // Don't run empty cells
+  // Update highlighting
+  codeEl.textContent = code + (code.endsWith('\n') ? ' ' : '');
+  Prism.highlightElement(codeEl);
+  
+  // Match heights
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+  pre.style.height = el.scrollHeight + 'px';
+  
+  saveNotebook();
+}
 
-  indicator.textContent = "[*]";
-  outputEl.classList.remove("error");
-  outputEl.classList.add("visible");
-  outputEl.textContent = "Executing...";
+// --- API Execution ---
+async function runSingleCell(cell) {
+  const code = cell.querySelector('textarea').value;
+  const output = cell.querySelector('.output-area');
+  const counter = cell.querySelector('.execution-count');
+  
+  if (!code.trim()) return;
+
+  output.className = 'output-area visible';
+  output.textContent = 'Executing...';
+  counter.textContent = '[*]';
 
   try {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": API_KEY // Crucial: FastAPI will block it without this
+        "x-api-key": API_KEY
       },
-      body: JSON.stringify({ code: code }) // Sending "code" to match your backend
+      body: JSON.stringify({ code: code })
     });
 
     const data = await res.json();
-    
-    // Check if the server threw an HTTP error (like 403 Forbidden or 429 Rate Limit)
-    if (!res.ok) {
-        outputEl.classList.add("error");
-        outputEl.textContent = data.detail || data.error || `HTTP Error ${res.status}`;
-        return;
-    }
 
-    // Handle normal execution results
-    if (data.stderr && data.stderr.trim() !== "") {
-      outputEl.classList.add("error");
-      outputEl.textContent = data.stderr;
+    if (!res.ok) throw new Error(data.detail || 'Server Error');
+
+    if (data.stderr) {
+      output.classList.add('error');
+      output.textContent = data.stderr;
     } else {
-      outputEl.classList.remove("error");
-      outputEl.textContent = data.stdout || "(No output)";
+      output.classList.add('success');
+      output.textContent = data.stdout || '(No output)';
     }
-    
   } catch (err) {
-    outputEl.classList.add("error");
-    outputEl.textContent = "Connection Error: Is your FastAPI server running on localhost:8000?";
+    output.classList.add('error');
+    output.textContent = `Error: ${err.message}`;
   } finally {
-    indicator.textContent = `[${executionCounter++}]`;
+    counter.textContent = `[${executionCounter++}]`;
   }
 }
 
 async function runAllCells() {
-  const cells = document.querySelectorAll(".cell");
+  const cells = document.querySelectorAll('.cell');
   for (const cell of cells) {
-    await runCell(cell);
+    await runSingleCell(cell);
   }
 }
 
-// Start with one default cell containing some test code
-document.addEventListener("DOMContentLoaded", () => {
-  addCell();
-  document.querySelector("textarea").value = 'print("Welcome to OroLabs Protolab!")\n\nimport math\nprint(f"Pi is roughly {math.pi:.4f}")';
-  document.querySelector("textarea").dispatchEvent(new Event('input')); // trigger resize
-});
+function clearAllOutputs() {
+  document.querySelectorAll('.output-area').forEach(out => {
+    out.className = 'output-area';
+    out.textContent = '';
+  });
+}
+
+function downloadAsPython() {
+  let content = "# OroLabs Protolab Export\n\n";
+  document.querySelectorAll('textarea').forEach(tx => content += tx.value + "\n\n");
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'notebook.py';
+  a.click();
+}
+
+function moveCell(btn, direction) {
+  const cell = btn.closest('.cell');
+  if (direction === -1 && cell.previousElementSibling) {
+    cell.parentNode.insertBefore(cell, cell.previousElementSibling);
+  } else if (direction === 1 && cell.nextElementSibling) {
+    cell.parentNode.insertBefore(cell.nextElementSibling, cell);
+  }
+  saveNotebook();
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', loadNotebook);
 </script>
 
 </body>
