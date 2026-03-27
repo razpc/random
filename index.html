@@ -1,91 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>OroLabs Protolab</title>
+  <meta charset="UTF-8" />
+  <title>OroLabs Protolab</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg-color: #121212;
+      --cell-bg: #1e1e1e;
+      --border-color: #333;
+      --text-main: #e8eaed;
+      --text-muted: #9aa0a6;
+      --accent: #8ab4f8;
+      --btn-hover: #303134;
+      --run-bg: #238636;
+      --run-hover: #2ea043;
+    }
 
-<style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0b0f14;
-    color: #e6edf3;
-}
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-main);
+    }
 
-header {
-    background: #111826;
-    padding: 12px 20px;
-    font-size: 18px;
-    font-weight: bold;
-}
+    /* Top Navigation */
+    .topbar {
+      background: var(--cell-bg);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-#container {
-    padding: 20px;
-}
+    .logo {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-textarea {
-    width: 100%;
-    height: 200px;
-    background: #0d1117;
-    color: #e6edf3;
-    border: 1px solid #30363d;
-    padding: 10px;
-}
+    .actions button {
+      margin-left: 8px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      padding: 6px 16px;
+      color: var(--text-main);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
 
-button {
-    margin-top: 10px;
-    padding: 10px 16px;
-    background: #238636;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
+    .actions button.primary {
+      background: var(--run-bg);
+      border-color: var(--run-bg);
+      color: white;
+      font-weight: bold;
+    }
 
-pre {
-    background: #010409;
-    padding: 15px;
-    margin-top: 20px;
-    border: 1px solid #30363d;
-    overflow: auto;
-}
-</style>
+    .actions button:hover {
+      background: var(--btn-hover);
+    }
+
+    .actions button.primary:hover {
+      background: var(--run-hover);
+    }
+
+    /* Notebook Layout */
+    .notebook {
+      padding: 40px 20px;
+      max-width: 960px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Cell Styles */
+    .cell {
+      display: flex;
+      background: var(--cell-bg);
+      border-radius: 8px;
+      border: 1px solid transparent;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      transition: border 0.2s;
+    }
+
+    .cell:focus-within {
+      border-color: var(--border-color);
+    }
+
+    .cell-gutter {
+      width: 60px;
+      padding: 12px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-right: 1px solid transparent;
+    }
+
+    .run-indicator {
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .run-btn {
+      background: var(--btn-hover);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .run-btn:hover {
+      background: var(--run-bg);
+      color: white;
+    }
+
+    .cell-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      position: relative;
+    }
+
+    .cell-content textarea {
+      width: 100%;
+      background: transparent;
+      color: var(--text-main);
+      border: none;
+      resize: none;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 15px;
+      line-height: 1.5;
+      outline: none;
+      overflow: hidden;
+      min-height: 40px;
+    }
+
+    .cell-controls {
+      display: flex;
+      justify-content: flex-end;
+      opacity: 0;
+      transition: opacity 0.2s;
+      margin-top: 8px;
+    }
+
+    .cell:hover .cell-controls {
+      opacity: 1;
+    }
+
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: #ff7b72;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .delete-btn:hover {
+      background: rgba(255, 123, 114, 0.1);
+    }
+
+    .output {
+      background: #0d1117;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 12px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      display: none;
+      border-left: 3px solid var(--accent);
+      color: #c9d1d9;
+    }
+
+    .output.visible {
+      display: block;
+    }
+    
+    .output.error {
+      border-left-color: #ff7b72;
+      color: #ff7b72;
+    }
+  </style>
 </head>
-
 <body>
 
-<header>OroLabs Protolab</header>
-
-<div id="container">
-    <textarea id="code">print("Hello from Protolab")</textarea>
-    <br>
-    <button onclick="runCode()">Run</button>
-
-    <pre id="output">Output will appear here...</pre>
+<div class="topbar">
+  <div class="logo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+    OroLabs Protolab
+  </div>
+  <div class="actions">
+    <button onclick="addCell()">+ Code</button>
+    <button class="primary" onclick="runAllCells()">Run All</button>
+  </div>
 </div>
 
+<div class="notebook" id="notebook"></div>
+
 <script>
-async function runCode() {
-    const code = document.getElementById("code").value;
-    const output = document.getElementById("output");
+// --- Configuration ---
+const API_URL = "http://localhost:8000/run"; // Pointing to your FastAPI server
+const API_KEY = "dev-secret"; // Matching the API_SECRET in your main.py
 
-    output.textContent = "Running...";
+let executionCounter = 1;
 
-    try {
-        const response = await fetch("http://localhost:8000/run", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ code: code })
-        });
+// --- Core Functions ---
+function createCell() {
+  const cell = document.createElement("div");
+  cell.className = "cell";
 
-        const data = await response.json();
-        output.textContent = data.output || JSON.stringify(data, null, 2);
+  cell.innerHTML = `
+    <div class="cell-gutter">
+      <div class="run-indicator">[ ]</div>
+      <button class="run-btn" title="Run cell">▶</button>
+    </div>
+    <div class="cell-content">
+      <textarea placeholder="Write Python code here..."></textarea>
+      <div class="cell-controls">
+        <button class="delete-btn">Delete Cell</button>
+      </div>
+      <div class="output"></div>
+    </div>
+  `;
 
-    } catch (err) {
-        output.textContent = "FETCH FAILED\n\n" + err;
+  const textarea = cell.querySelector("textarea");
+  const runBtn = cell.querySelector(".run-btn");
+  const deleteBtn = cell.querySelector(".delete-btn");
+
+  // Auto-resize
+  textarea.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+  });
+
+  // Shift+Enter to run, Tab to indent
+  textarea.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = this.selectionStart;
+      const end = this.selectionEnd;
+      this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+      this.selectionStart = this.selectionEnd = start + 4;
     }
+    if (e.key === 'Enter' && e.shiftKey) {
+      e.preventDefault();
+      runCell(cell);
+    }
+  });
+
+  runBtn.addEventListener('click', () => runCell(cell));
+  deleteBtn.addEventListener('click', () => cell.remove());
+
+  return cell;
 }
+
+function addCell() {
+  const notebook = document.getElementById("notebook");
+  const newCell = createCell();
+  notebook.appendChild(newCell);
+  newCell.querySelector("textarea").focus();
+}
+
+async function runCell(cell) {
+  const code = cell.querySelector("textarea").value.trim();
+  const outputEl = cell.querySelector(".output");
+  const indicator = cell.querySelector(".run-indicator");
+  
+  if (!code) return; // Don't run empty cells
+
+  indicator.textContent = "[*]";
+  outputEl.classList.remove("error");
+  outputEl.classList.add("visible");
+  outputEl.textContent = "Executing...";
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY // Crucial: FastAPI will block it without this
+      },
+      body: JSON.stringify({ code: code }) // Sending "code" to match your backend
+    });
+
+    const data = await res.json();
+    
+    // Check if the server threw an HTTP error (like 403 Forbidden or 429 Rate Limit)
+    if (!res.ok) {
+        outputEl.classList.add("error");
+        outputEl.textContent = data.detail || data.error || `HTTP Error ${res.status}`;
+        return;
+    }
+
+    // Handle normal execution results
+    if (data.stderr && data.stderr.trim() !== "") {
+      outputEl.classList.add("error");
+      outputEl.textContent = data.stderr;
+    } else {
+      outputEl.classList.remove("error");
+      outputEl.textContent = data.stdout || "(No output)";
+    }
+    
+  } catch (err) {
+    outputEl.classList.add("error");
+    outputEl.textContent = "Connection Error: Is your FastAPI server running on localhost:8000?";
+  } finally {
+    indicator.textContent = `[${executionCounter++}]`;
+  }
+}
+
+async function runAllCells() {
+  const cells = document.querySelectorAll(".cell");
+  for (const cell of cells) {
+    await runCell(cell);
+  }
+}
+
+// Start with one default cell containing some test code
+document.addEventListener("DOMContentLoaded", () => {
+  addCell();
+  document.querySelector("textarea").value = 'print("Welcome to OroLabs Protolab!")\n\nimport math\nprint(f"Pi is roughly {math.pi:.4f}")';
+  document.querySelector("textarea").dispatchEvent(new Event('input')); // trigger resize
+});
 </script>
 
 </body>
