@@ -155,15 +155,36 @@ async function runCell(btn) {
       body: JSON.stringify({ code })
     });
 
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      const text = await res.text();
+      out.textContent = "Non-JSON response:\n" + text;
+      return;
+    }
+
+    if (!res.ok) {
+      out.textContent =
+        "HTTP " + res.status + "\n\n" +
+        JSON.stringify(data, null, 2);
+      return;
+    }
 
     out.innerHTML =
-      data.stdout +
+      (data.stdout || "") +
       (data.stderr ? `<div class="stderr">${data.stderr}</div>` : "");
 
     addHistory(code);
-  } catch (e) {
-    out.textContent = "Network error";
+
+  } catch (err) {
+    out.textContent =
+      "FETCH FAILED\n\n" +
+      err.message +
+      "\n\nThis usually means:\n" +
+      "- CORS blocked\n" +
+      "- Wrong domain\n" +
+      "- API offline";
   }
 
   saveNotebook();
