@@ -139,8 +139,8 @@
 
 <script>
 // FIXED: Using 127.0.0.1 instead of localhost for better browser compatibility
-const API_URL = "http://localhost:8000/run";
-const HEALTH_URL = "http://localhost:8000/health";
+const API_URL = "http://0.0.0.0:8000/run";
+const HEALTH_URL = "http://0.0.0.0:8000/health";
 const API_KEY = "dev-secret";
 
 async function checkHealth() {
@@ -153,7 +153,7 @@ async function checkHealth() {
     }
 }
 
-function addCodeCell(code = "print('Hello Protolab')") {
+function addCodeCell(code = "print('Hello, world!')") {
     const notebook = document.getElementById('notebook');
     const cell = document.createElement('div');
     cell.className = 'cell';
