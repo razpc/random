@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OroLabs Protolab</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #202124;
+      color: #e8eaed;
+    }
+
+    .topbar {
+      background: #303134;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: bold;
+      color: #8ab4f8;
+    }
+
+    .actions button {
+      margin-left: 8px;
+      background: #1a73e8;
+      border: none;
+      padding: 8px 12px;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .actions button:hover {
+      background: #1557b0;
+    }
+
+    .notebook {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .cell {
+      background: #2d2e30;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      padding: 10px;
+    }
+
+    .cell textarea {
+      width: 100%;
+      background: #202124;
+      color: #e8eaed;
+      border: none;
+      resize: vertical;
+      min-height: 120px;
+      font-family: monospace;
+      padding: 8px;
+    }
+
+    .cell-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .cell-footer button {
+      background: #1a73e8;
+      border: none;
+      padding: 6px 10px;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .output {
+      background: #111;
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">OroLabs Protolab Notebook</div>
+  <div class="actions">
+    <button onclick="addCell()">+ Code</button>
+    <button onclick="runAll()">Run All</button>
+  </div>
+</div>
+
+<div class="notebook" id="notebook"></div>
+
+<script>
+const API_URL = "https://protolab.research.orolabs.com/run";
+const API_KEY = "dev-secret";
+
+function createCell() {
+  const cell = document.createElement("div");
+  cell.className = "cell";
+
+  cell.innerHTML = `
+    <textarea placeholder="Write Python or choose an action like train/status"></textarea>
+    <div class="cell-footer">
+      <button onclick="runCell(this)">Run</button>
+      <button onclick="deleteCell(this)">Delete</button>
+    </div>
+    <div class="output"></div>
+  `;
+
+  return cell;
+}
+
+function addCell() {
+  document.getElementById("notebook").appendChild(createCell());
+}
+
+function deleteCell(btn) {
+  btn.closest(".cell").remove();
+}
+
+async function runCell(btn) {
+  const cell = btn.closest(".cell");
+  const code = cell.querySelector("textarea").value.trim();
+  const output = cell.querySelector(".output");
+
+  output.textContent = "Running...";
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY
+      },
+      body: JSON.stringify({ action: code })
+    });
+
+    const data = await res.json();
+    output.textContent = JSON.stringify(data, null, 2);
+  } catch (err) {
+    output.textContent = "Error: " + err.message;
+  }
+}
+
+function runAll() {
+  document.querySelectorAll(".cell button:first-child").forEach(btn => btn.click());
+}
+
+addCell();
+</script>
