@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>OroLabs Protolab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     :root {
       --bg-color: #121212;
@@ -24,12 +25,10 @@
       color: var(--text-main);
     }
 
-    /* Top Navigation */
     .topbar {
       background: var(--cell-bg);
       padding: 12px 24px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border-color);
       position: sticky;
@@ -41,9 +40,6 @@
       font-size: 18px;
       font-weight: 600;
       color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .actions button {
@@ -54,8 +50,6 @@
       color: var(--text-main);
       border-radius: 4px;
       cursor: pointer;
-      font-size: 14px;
-      transition: background 0.2s;
     }
 
     .actions button.primary {
@@ -63,15 +57,6 @@
       border-color: var(--run-bg);
     }
 
-    .actions button:hover {
-      background: var(--btn-hover);
-    }
-
-    .actions button.primary:hover {
-      background: var(--run-hover);
-    }
-
-    /* Notebook Layout */
     .notebook {
       padding: 40px 20px;
       max-width: 960px;
@@ -81,18 +66,11 @@
       gap: 16px;
     }
 
-    /* Cell Styles */
     .cell {
       display: flex;
       background: var(--cell-bg);
       border-radius: 8px;
-      border: 1px solid transparent;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-      transition: border 0.2s;
-    }
-
-    .cell:focus-within {
-      border-color: var(--border-color);
+      border: 1px solid var(--border-color);
     }
 
     .cell-gutter {
@@ -101,7 +79,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      border-right: 1px solid transparent;
     }
 
     .run-indicator {
@@ -119,15 +96,6 @@
       height: 32px;
       color: var(--text-main);
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      transition: background 0.2s;
-    }
-
-    .run-btn:hover {
-      background: var(--run-bg);
     }
 
     .cell-content {
@@ -135,47 +103,18 @@
       display: flex;
       flex-direction: column;
       padding: 12px;
-      position: relative;
     }
 
-    .cell-content textarea {
+    textarea {
       width: 100%;
       background: transparent;
       color: var(--text-main);
       border: none;
       resize: none;
-      font-family: 'Consolas', 'Monaco', monospace;
+      font-family: monospace;
       font-size: 14px;
-      line-height: 1.5;
       outline: none;
-      overflow: hidden;
       min-height: 40px;
-    }
-
-    .cell-controls {
-      display: flex;
-      justify-content: flex-end;
-      opacity: 0;
-      transition: opacity 0.2s;
-      margin-top: 8px;
-    }
-
-    .cell:hover .cell-controls {
-      opacity: 1;
-    }
-
-    .delete-btn {
-      background: transparent;
-      border: none;
-      color: #ff5252;
-      cursor: pointer;
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-
-    .delete-btn:hover {
-      background: rgba(255, 82, 82, 0.1);
     }
 
     .output {
@@ -183,7 +122,7 @@
       padding: 12px;
       border-radius: 4px;
       margin-top: 12px;
-      font-family: 'Consolas', 'Monaco', monospace;
+      font-family: monospace;
       font-size: 13px;
       white-space: pre-wrap;
       display: none;
@@ -193,7 +132,7 @@
     .output.visible {
       display: block;
     }
-    
+
     .output.error {
       border-left-color: #ff5252;
       color: #ff8a80;
@@ -203,10 +142,7 @@
 <body>
 
 <div class="topbar">
-  <div class="logo">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-    OroLabs Protolab
-  </div>
+  <div class="logo">OroLabs Protolab</div>
   <div class="actions">
     <button onclick="addCell()">+ Code Cell</button>
     <button class="primary" onclick="runAllCells()">Run All</button>
@@ -216,18 +152,10 @@
 <div class="notebook" id="notebook"></div>
 
 <script>
-// --- Configuration ---
 const API_URL = "https://protolab.research.orolabs.com/run";
-/* SECURITY WARNING: Never hardcode real API keys in client-side HTML/JS. 
-  Anyone viewing the page source can steal this key. 
-  For a production app, this fetch request should go to your own backend, 
-  which securely stores the key and proxies the request to OroLabs.
-*/
-const API_KEY = "dev-secret"; 
+const API_KEY = "dev-secret"; // replace or proxy in production
 
 let executionCounter = 1;
-
-// --- Core Functions ---
 
 function createCell() {
   const cell = document.createElement("div");
@@ -236,97 +164,94 @@ function createCell() {
   cell.innerHTML = `
     <div class="cell-gutter">
       <div class="run-indicator">[ ]</div>
-      <button class="run-btn" title="Run cell">▶</button>
+      <button class="run-btn">▶</button>
     </div>
     <div class="cell-content">
-      <textarea placeholder="Write Python code here..."></textarea>
-      <div class="cell-controls">
-        <button class="delete-btn">Delete</button>
-      </div>
+      <textarea placeholder="Use !status, !train, or !predict"></textarea>
       <div class="output"></div>
     </div>
   `;
 
-  // Attach Event Listeners
   const textarea = cell.querySelector("textarea");
   const runBtn = cell.querySelector(".run-btn");
-  const deleteBtn = cell.querySelector(".delete-btn");
 
-  // Auto-resize textarea
-  textarea.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = (this.scrollHeight) + 'px';
+  textarea.addEventListener("input", function () {
+    this.style.height = "auto";
+    this.style.height = this.scrollHeight + "px";
   });
 
-  // Handle 'Tab' key inside textarea
-  textarea.addEventListener('keydown', function(e) {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      const start = this.selectionStart;
-      const end = this.selectionEnd;
-      // Insert 4 spaces
-      this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
-      this.selectionStart = this.selectionEnd = start + 4;
-    }
-    // Optional: Run on Shift+Enter
-    if (e.key === 'Enter' && e.shiftKey) {
+  textarea.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.shiftKey) {
       e.preventDefault();
       runCell(cell);
     }
   });
 
-  runBtn.addEventListener('click', () => runCell(cell));
-  deleteBtn.addEventListener('click', () => cell.remove());
+  runBtn.onclick = () => runCell(cell);
 
   return cell;
 }
 
 function addCell() {
   const notebook = document.getElementById("notebook");
-  const newCell = createCell();
-  notebook.appendChild(newCell);
-  // Focus the new textarea
-  newCell.querySelector("textarea").focus();
+  const cell = createCell();
+  notebook.appendChild(cell);
+  cell.querySelector("textarea").focus();
+}
+
+function parseCommand(code) {
+  if (!code.startsWith("!")) {
+    return null;
+  }
+  return code.substring(1).trim().toLowerCase();
 }
 
 async function runCell(cell) {
   const code = cell.querySelector("textarea").value.trim();
-  const outputEl = cell.querySelector(".output");
+  const output = cell.querySelector(".output");
   const indicator = cell.querySelector(".run-indicator");
-  
-  // UI Loading State
+
+  if (!code) return;
+
+  const action = parseCommand(code);
+
+  if (!action) {
+    output.classList.add("visible", "error");
+    output.textContent = "Only OroLabs commands allowed. Example: !train";
+    return;
+  }
+
   indicator.textContent = "[*]";
-  outputEl.classList.remove("error");
-  outputEl.classList.add("visible");
-  outputEl.textContent = "Executing...";
+  output.classList.remove("error");
+  output.classList.add("visible");
+  output.textContent = "Running " + action + "...";
 
   try {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": API_KEY 
+        "x-api-key": API_KEY
       },
-      body: JSON.stringify({ action: code })
+      body: JSON.stringify({ action })
     });
 
     const data = await res.json();
-    outputEl.textContent = JSON.stringify(data, null, 2);
-    
-  } catch (err) {
-    outputEl.classList.add("error");
-    // Show a mock response if the API URL doesn't exist yet for testing purposes
-    if(err.message === "Failed to fetch") {
-      outputEl.textContent = "Error: Failed to fetch.\n\n(Note: If the OroLabs API is not live, this is expected. Simulated output below:)\n>>> Hello World!";
-    } else {
-      outputEl.textContent = "Error: " + err.message;
+
+    if (!res.ok) {
+      output.classList.add("error");
     }
-  } finally {
-    indicator.textContent = `[${executionCounter++}]`;
+
+    output.textContent = JSON.stringify(data, null, 2);
+
+  } catch (err) {
+    output.classList.add("error");
+    output.textContent = "Network error: " + err.message;
   }
+
+  indicator.textContent = "[" + executionCounter++ + "]";
 }
 
-// Executes cells sequentially
 async function runAllCells() {
   const cells = document.querySelectorAll(".cell");
   for (const cell of cells) {
@@ -334,10 +259,7 @@ async function runAllCells() {
   }
 }
 
-// Initialize with one empty cell
-document.addEventListener("DOMContentLoaded", () => {
-  addCell();
-});
+document.addEventListener("DOMContentLoaded", () => addCell());
 </script>
 
 </body>
