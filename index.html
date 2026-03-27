@@ -130,7 +130,7 @@
 
   <div class="status-bar">
     <span id="connection-status"><span class="status-dot offline"></span> Checking backend...</span>
-    <span>Host: 127.0.0.1:8000</span>
+    <span>OroLabs</span>
   </div>
 </div>
 
@@ -139,8 +139,8 @@
 
 <script>
 // FIXED: Using 127.0.0.1 instead of localhost for better browser compatibility
-const API_URL = "http://127.0.0.1:8000/run";
-const HEALTH_URL = "http://127.0.0.1:8000/health";
+const API_URL = "http://0.0.0.:8000/run";
+const HEALTH_URL = "http://0.0.0.0:8000/health";
 const API_KEY = "dev-secret";
 
 async function checkHealth() {
@@ -211,7 +211,7 @@ async function runSingleCell(cell) {
         }
     } catch (err) {
         output.classList.add('error');
-        output.textContent = "FAILED TO FETCH: Is the Python script running on 127.0.0.1:8000?";
+        output.textContent = "FAILED TO FETCH: Is the Python script running on 0.0.0.0:8000?";
     }
 }
 
