@@ -1,230 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>OroLabs Protolab</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<title>OroLabs Protolab Notebook</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    :root {
-      --bg-color: #121212;
-      --cell-bg: #1e1e1e;
-      --border-color: #333;
-      --text-main: #e8eaed;
-      --text-muted: #9aa0a6;
-      --accent: #8ab4f8;
-      --btn-hover: #303134;
-      --run-bg: #1a73e8;
-      --run-hover: #1557b0;
-    }
+<style>
+:root {
+  --bg: #121212;
+  --cell: #1e1e1e;
+  --border: #333;
+  --text: #e8eaed;
+  --accent: #8ab4f8;
+}
 
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg-color);
-      color: var(--text-main);
-    }
+body {
+  margin: 0;
+  font-family: monospace;
+  background: var(--bg);
+  color: var(--text);
+}
 
-    .topbar {
-      background: var(--cell-bg);
-      padding: 12px 24px;
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border-color);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: #1e1e1e;
+  border-bottom: 1px solid var(--border);
+}
 
-    .logo {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--accent);
-    }
+button {
+  background: #2a2a2a;
+  border: 1px solid var(--border);
+  color: white;
+  padding: 5px 10px;
+  margin-right: 5px;
+  cursor: pointer;
+}
 
-    .actions button {
-      margin-left: 8px;
-      background: transparent;
-      border: 1px solid var(--border-color);
-      padding: 6px 16px;
-      color: var(--text-main);
-      border-radius: 4px;
-      cursor: pointer;
-    }
+button:hover {
+  background: #3a3a3a;
+}
 
-    .actions button.primary {
-      background: var(--run-bg);
-      border-color: var(--run-bg);
-    }
+#notebook {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
 
-    .notebook {
-      padding: 40px 20px;
-      max-width: 960px;
-      margin: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+.cell {
+  background: var(--cell);
+  border: 1px solid var(--border);
+  margin-bottom: 15px;
+  padding: 10px;
+}
 
-    .cell {
-      display: flex;
-      background: var(--cell-bg);
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
+textarea {
+  width: 100%;
+  background: transparent;
+  color: white;
+  border: none;
+  resize: vertical;
+  min-height: 80px;
+}
 
-    .cell-gutter {
-      width: 60px;
-      padding: 12px 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+.output {
+  background: black;
+  margin-top: 10px;
+  padding: 10px;
+  white-space: pre-wrap;
+}
 
-    .run-indicator {
-      font-family: monospace;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
+.stderr {
+  color: #ff6b6b;
+}
 
-    .run-btn {
-      background: var(--btn-hover);
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      color: var(--text-main);
-      cursor: pointer;
-    }
+.history {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 250px;
+  height: 100%;
+  background: #0f0f0f;
+  border-left: 1px solid var(--border);
+  overflow: auto;
+  padding: 10px;
+}
 
-    .cell-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 12px;
-    }
-
-    textarea {
-      width: 100%;
-      background: transparent;
-      color: var(--text-main);
-      border: none;
-      resize: none;
-      font-family: monospace;
-      font-size: 14px;
-      outline: none;
-      min-height: 40px;
-    }
-
-    .output {
-      background: #000;
-      padding: 12px;
-      border-radius: 4px;
-      margin-top: 12px;
-      font-family: monospace;
-      font-size: 13px;
-      white-space: pre-wrap;
-      display: none;
-      border-left: 3px solid var(--accent);
-    }
-
-    .output.visible {
-      display: block;
-    }
-
-    .output.error {
-      border-left-color: #ff5252;
-      color: #ff8a80;
-    }
-  </style>
+.history h3 {
+  margin-top: 0;
+}
+</style>
 </head>
+
 <body>
 
 <div class="topbar">
-  <div class="logo">OroLabs Protolab</div>
-  <div class="actions">
-    <button onclick="addCell()">+ Code Cell</button>
-    <button class="primary" onclick="runAllCells()">Run All</button>
+  <div>
+    <button onclick="addCell()">+ Cell</button>
+    <button onclick="runAll()">Run All</button>
+    <button onclick="exportNotebook()">Export</button>
+    <button onclick="importNotebook()">Import</button>
+    <input type="file" id="fileInput" style="display:none" onchange="loadFile(event)">
+    <button onclick="document.getElementById('fileInput').click()">Upload File</button>
   </div>
 </div>
 
-<div class="notebook" id="notebook"></div>
+<div id="notebook"></div>
+
+<div class="history">
+<h3>Execution History</h3>
+<div id="history"></div>
+</div>
 
 <script>
 const API_URL = "https://protolab.research.orolabs.com/run";
-const API_KEY = "dev-secret"; // replace or proxy in production
+const API_KEY = "dev-secret";
 
-let executionCounter = 1;
+let cellCount = 0;
 
-function createCell() {
+function createCell(code="") {
   const cell = document.createElement("div");
   cell.className = "cell";
 
   cell.innerHTML = `
-    <div class="cell-gutter">
-      <div class="run-indicator">[ ]</div>
-      <button class="run-btn">▶</button>
-    </div>
-    <div class="cell-content">
-      <textarea placeholder="Use !status, !train, or !predict"></textarea>
-      <div class="output"></div>
-    </div>
+    <textarea>${code}</textarea>
+    <button onclick="runCell(this)">Run</button>
+    <button onclick="this.parentElement.remove()">Delete</button>
+    <div class="output"></div>
   `;
-
-  const textarea = cell.querySelector("textarea");
-  const runBtn = cell.querySelector(".run-btn");
-
-  textarea.addEventListener("input", function () {
-    this.style.height = "auto";
-    this.style.height = this.scrollHeight + "px";
-  });
-
-  textarea.addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && e.shiftKey) {
-      e.preventDefault();
-      runCell(cell);
-    }
-  });
-
-  runBtn.onclick = () => runCell(cell);
-
   return cell;
 }
 
-function addCell() {
+function addCell(code="") {
   const notebook = document.getElementById("notebook");
-  const cell = createCell();
-  notebook.appendChild(cell);
-  cell.querySelector("textarea").focus();
+  notebook.appendChild(createCell(code));
+  saveNotebook();
 }
 
-function parseCommand(code) {
-  if (!code.startsWith("!")) {
-    return null;
-  }
-  return code.substring(1).trim().toLowerCase();
-}
+async function runCell(btn) {
+  const cell = btn.parentElement;
+  const code = cell.querySelector("textarea").value;
+  const out = cell.querySelector(".output");
 
-async function runCell(cell) {
-  const code = cell.querySelector("textarea").value.trim();
-  const output = cell.querySelector(".output");
-  const indicator = cell.querySelector(".run-indicator");
-
-  if (!code) return;
-
-  const action = parseCommand(code);
-
-  if (!action) {
-    output.classList.add("visible", "error");
-    output.textContent = "Only OroLabs commands allowed. Example: !train";
-    return;
-  }
-
-  indicator.textContent = "[*]";
-  output.classList.remove("error");
-  output.classList.add("visible");
-  output.textContent = "Running " + action + "...";
+  out.textContent = "Running...";
 
   try {
     const res = await fetch(API_URL, {
@@ -233,33 +152,85 @@ async function runCell(cell) {
         "Content-Type": "application/json",
         "x-api-key": API_KEY
       },
-      body: JSON.stringify({ action })
+      body: JSON.stringify({ code })
     });
 
     const data = await res.json();
 
-    if (!res.ok) {
-      output.classList.add("error");
-    }
+    out.innerHTML =
+      data.stdout +
+      (data.stderr ? `<div class="stderr">${data.stderr}</div>` : "");
 
-    output.textContent = JSON.stringify(data, null, 2);
-
-  } catch (err) {
-    output.classList.add("error");
-    output.textContent = "Network error: " + err.message;
+    addHistory(code);
+  } catch (e) {
+    out.textContent = "Network error";
   }
 
-  indicator.textContent = "[" + executionCounter++ + "]";
+  saveNotebook();
 }
 
-async function runAllCells() {
-  const cells = document.querySelectorAll(".cell");
-  for (const cell of cells) {
-    await runCell(cell);
+async function runAll() {
+  const cells = document.querySelectorAll(".cell button:first-of-type");
+  for (const btn of cells) {
+    await runCell(btn);
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => addCell());
+function addHistory(code) {
+  const hist = document.getElementById("history");
+  const div = document.createElement("div");
+  div.textContent = code.substring(0, 50);
+  hist.prepend(div);
+}
+
+function saveNotebook() {
+  const cells = [...document.querySelectorAll("textarea")]
+    .map(t => t.value);
+  localStorage.setItem("notebook", JSON.stringify(cells));
+}
+
+function loadNotebook() {
+  const data = localStorage.getItem("notebook");
+  if (!data) {
+    addCell();
+    return;
+  }
+
+  JSON.parse(data).forEach(code => addCell(code));
+}
+
+function exportNotebook() {
+  const data = localStorage.getItem("notebook");
+  const blob = new Blob([data], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "notebook.json";
+  a.click();
+}
+
+function importNotebook() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      localStorage.setItem("notebook", reader.result);
+      location.reload();
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function loadFile(event) {
+  const file = event.target.files[0];
+  const reader = new FileReader();
+  reader.onload = () => addCell(reader.result);
+  reader.readAsText(file);
+}
+
+document.addEventListener("DOMContentLoaded", loadNotebook);
 </script>
 
 </body>
