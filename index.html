@@ -5,159 +5,340 @@
   <title>OroLabs Protolab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #202124;
-      color: #e8eaed;
+    :root {
+      --bg-color: #121212;
+      --cell-bg: #1e1e1e;
+      --border-color: #333;
+      --text-main: #e8eaed;
+      --text-muted: #9aa0a6;
+      --accent: #8ab4f8;
+      --btn-hover: #303134;
+      --run-bg: #1a73e8;
+      --run-hover: #1557b0;
     }
 
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-main);
+    }
+
+    /* Top Navigation */
     .topbar {
-      background: #303134;
-      padding: 10px 16px;
+      background: var(--cell-bg);
+      padding: 12px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     .logo {
       font-size: 18px;
-      font-weight: bold;
-      color: #8ab4f8;
+      font-weight: 600;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .actions button {
       margin-left: 8px;
-      background: #1a73e8;
-      border: none;
-      padding: 8px 12px;
-      color: white;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      padding: 6px 16px;
+      color: var(--text-main);
       border-radius: 4px;
       cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .actions button.primary {
+      background: var(--run-bg);
+      border-color: var(--run-bg);
     }
 
     .actions button:hover {
-      background: #1557b0;
+      background: var(--btn-hover);
     }
 
+    .actions button.primary:hover {
+      background: var(--run-hover);
+    }
+
+    /* Notebook Layout */
     .notebook {
-      padding: 20px;
-      max-width: 900px;
+      padding: 40px 20px;
+      max-width: 960px;
       margin: auto;
-    }
-
-    .cell {
-      background: #2d2e30;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-      padding: 10px;
-    }
-
-    .cell textarea {
-      width: 100%;
-      background: #202124;
-      color: #e8eaed;
-      border: none;
-      resize: vertical;
-      min-height: 120px;
-      font-family: monospace;
-      padding: 8px;
-    }
-
-    .cell-footer {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Cell Styles */
+    .cell {
+      display: flex;
+      background: var(--cell-bg);
+      border-radius: 8px;
+      border: 1px solid transparent;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      transition: border 0.2s;
+    }
+
+    .cell:focus-within {
+      border-color: var(--border-color);
+    }
+
+    .cell-gutter {
+      width: 60px;
+      padding: 12px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-right: 1px solid transparent;
+    }
+
+    .run-indicator {
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .run-btn {
+      background: var(--btn-hover);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .run-btn:hover {
+      background: var(--run-bg);
+    }
+
+    .cell-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      position: relative;
+    }
+
+    .cell-content textarea {
+      width: 100%;
+      background: transparent;
+      color: var(--text-main);
+      border: none;
+      resize: none;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      outline: none;
+      overflow: hidden;
+      min-height: 40px;
+    }
+
+    .cell-controls {
+      display: flex;
+      justify-content: flex-end;
+      opacity: 0;
+      transition: opacity 0.2s;
       margin-top: 8px;
     }
 
-    .cell-footer button {
-      background: #1a73e8;
+    .cell:hover .cell-controls {
+      opacity: 1;
+    }
+
+    .delete-btn {
+      background: transparent;
       border: none;
-      padding: 6px 10px;
-      color: white;
-      border-radius: 4px;
+      color: #ff5252;
       cursor: pointer;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .delete-btn:hover {
+      background: rgba(255, 82, 82, 0.1);
     }
 
     .output {
-      background: #111;
-      padding: 8px;
+      background: #000;
+      padding: 12px;
       border-radius: 4px;
-      margin-top: 8px;
-      font-family: monospace;
+      margin-top: 12px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
       white-space: pre-wrap;
+      display: none;
+      border-left: 3px solid var(--accent);
+    }
+
+    .output.visible {
+      display: block;
+    }
+    
+    .output.error {
+      border-left-color: #ff5252;
+      color: #ff8a80;
     }
   </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="logo">OroLabs Protolab Notebook</div>
+  <div class="logo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+    OroLabs Protolab
+  </div>
   <div class="actions">
-    <button onclick="addCell()">+ Code</button>
-    <button onclick="runAll()">Run All</button>
+    <button onclick="addCell()">+ Code Cell</button>
+    <button class="primary" onclick="runAllCells()">Run All</button>
   </div>
 </div>
 
 <div class="notebook" id="notebook"></div>
 
 <script>
+// --- Configuration ---
 const API_URL = "https://protolab.research.orolabs.com/run";
-const API_KEY = "dev-secret";
+/* SECURITY WARNING: Never hardcode real API keys in client-side HTML/JS. 
+  Anyone viewing the page source can steal this key. 
+  For a production app, this fetch request should go to your own backend, 
+  which securely stores the key and proxies the request to OroLabs.
+*/
+const API_KEY = "dev-secret"; 
+
+let executionCounter = 1;
+
+// --- Core Functions ---
 
 function createCell() {
   const cell = document.createElement("div");
   cell.className = "cell";
 
   cell.innerHTML = `
-    <textarea placeholder="Write Python or choose an action like train/status"></textarea>
-    <div class="cell-footer">
-      <button onclick="runCell(this)">Run</button>
-      <button onclick="deleteCell(this)">Delete</button>
+    <div class="cell-gutter">
+      <div class="run-indicator">[ ]</div>
+      <button class="run-btn" title="Run cell">▶</button>
     </div>
-    <div class="output"></div>
+    <div class="cell-content">
+      <textarea placeholder="Write Python code here..."></textarea>
+      <div class="cell-controls">
+        <button class="delete-btn">Delete</button>
+      </div>
+      <div class="output"></div>
+    </div>
   `;
+
+  // Attach Event Listeners
+  const textarea = cell.querySelector("textarea");
+  const runBtn = cell.querySelector(".run-btn");
+  const deleteBtn = cell.querySelector(".delete-btn");
+
+  // Auto-resize textarea
+  textarea.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = (this.scrollHeight) + 'px';
+  });
+
+  // Handle 'Tab' key inside textarea
+  textarea.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = this.selectionStart;
+      const end = this.selectionEnd;
+      // Insert 4 spaces
+      this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+      this.selectionStart = this.selectionEnd = start + 4;
+    }
+    // Optional: Run on Shift+Enter
+    if (e.key === 'Enter' && e.shiftKey) {
+      e.preventDefault();
+      runCell(cell);
+    }
+  });
+
+  runBtn.addEventListener('click', () => runCell(cell));
+  deleteBtn.addEventListener('click', () => cell.remove());
 
   return cell;
 }
 
 function addCell() {
-  document.getElementById("notebook").appendChild(createCell());
+  const notebook = document.getElementById("notebook");
+  const newCell = createCell();
+  notebook.appendChild(newCell);
+  // Focus the new textarea
+  newCell.querySelector("textarea").focus();
 }
 
-function deleteCell(btn) {
-  btn.closest(".cell").remove();
-}
-
-async function runCell(btn) {
-  const cell = btn.closest(".cell");
+async function runCell(cell) {
   const code = cell.querySelector("textarea").value.trim();
-  const output = cell.querySelector(".output");
-
-  output.textContent = "Running...";
+  const outputEl = cell.querySelector(".output");
+  const indicator = cell.querySelector(".run-indicator");
+  
+  // UI Loading State
+  indicator.textContent = "[*]";
+  outputEl.classList.remove("error");
+  outputEl.classList.add("visible");
+  outputEl.textContent = "Executing...";
 
   try {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": API_KEY
+        "x-api-key": API_KEY 
       },
       body: JSON.stringify({ action: code })
     });
 
     const data = await res.json();
-    output.textContent = JSON.stringify(data, null, 2);
+    outputEl.textContent = JSON.stringify(data, null, 2);
+    
   } catch (err) {
-    output.textContent = "Error: " + err.message;
+    outputEl.classList.add("error");
+    // Show a mock response if the API URL doesn't exist yet for testing purposes
+    if(err.message === "Failed to fetch") {
+      outputEl.textContent = "Error: Failed to fetch.\n\n(Note: If the OroLabs API is not live, this is expected. Simulated output below:)\n>>> Hello World!";
+    } else {
+      outputEl.textContent = "Error: " + err.message;
+    }
+  } finally {
+    indicator.textContent = `[${executionCounter++}]`;
   }
 }
 
-function runAll() {
-  document.querySelectorAll(".cell button:first-child").forEach(btn => btn.click());
+// Executes cells sequentially
+async function runAllCells() {
+  const cells = document.querySelectorAll(".cell");
+  for (const cell of cells) {
+    await runCell(cell);
+  }
 }
 
-addCell();
+// Initialize with one empty cell
+document.addEventListener("DOMContentLoaded", () => {
+  addCell();
+});
 </script>
+
+</body>
+</html>
