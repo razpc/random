@@ -2,256 +2,90 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>OroLabs Protolab Notebook</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OroLabs Protolab</title>
 
 <style>
-:root {
-  --bg: #121212;
-  --cell: #1e1e1e;
-  --border: #333;
-  --text: #e8eaed;
-  --accent: #8ab4f8;
-}
-
 body {
-  margin: 0;
-  font-family: monospace;
-  background: var(--bg);
-  color: var(--text);
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b0f14;
+    color: #e6edf3;
 }
 
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 20px;
-  background: #1e1e1e;
-  border-bottom: 1px solid var(--border);
+header {
+    background: #111826;
+    padding: 12px 20px;
+    font-size: 18px;
+    font-weight: bold;
 }
 
-button {
-  background: #2a2a2a;
-  border: 1px solid var(--border);
-  color: white;
-  padding: 5px 10px;
-  margin-right: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #3a3a3a;
-}
-
-#notebook {
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
-}
-
-.cell {
-  background: var(--cell);
-  border: 1px solid var(--border);
-  margin-bottom: 15px;
-  padding: 10px;
+#container {
+    padding: 20px;
 }
 
 textarea {
-  width: 100%;
-  background: transparent;
-  color: white;
-  border: none;
-  resize: vertical;
-  min-height: 80px;
+    width: 100%;
+    height: 200px;
+    background: #0d1117;
+    color: #e6edf3;
+    border: 1px solid #30363d;
+    padding: 10px;
 }
 
-.output {
-  background: black;
-  margin-top: 10px;
-  padding: 10px;
-  white-space: pre-wrap;
+button {
+    margin-top: 10px;
+    padding: 10px 16px;
+    background: #238636;
+    color: white;
+    border: none;
+    cursor: pointer;
 }
 
-.stderr {
-  color: #ff6b6b;
-}
-
-.history {
-  position: fixed;
-  right: 0;
-  top: 0;
-  width: 250px;
-  height: 100%;
-  background: #0f0f0f;
-  border-left: 1px solid var(--border);
-  overflow: auto;
-  padding: 10px;
-}
-
-.history h3 {
-  margin-top: 0;
+pre {
+    background: #010409;
+    padding: 15px;
+    margin-top: 20px;
+    border: 1px solid #30363d;
+    overflow: auto;
 }
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
-  <div>
-    <button onclick="addCell()">+ Cell</button>
-    <button onclick="runAll()">Run All</button>
-    <button onclick="exportNotebook()">Export</button>
-    <button onclick="importNotebook()">Import</button>
-    <input type="file" id="fileInput" style="display:none" onchange="loadFile(event)">
-    <button onclick="document.getElementById('fileInput').click()">Upload File</button>
-  </div>
-</div>
+<header>OroLabs Protolab</header>
 
-<div id="notebook"></div>
+<div id="container">
+    <textarea id="code">print("Hello from Protolab")</textarea>
+    <br>
+    <button onclick="runCode()">Run</button>
 
-<div class="history">
-<h3>Execution History</h3>
-<div id="history"></div>
+    <pre id="output">Output will appear here...</pre>
 </div>
 
 <script>
-const API_URL = "https://localhost:8888/run";
-const API_KEY = "dev-secret";
+async function runCode() {
+    const code = document.getElementById("code").value;
+    const output = document.getElementById("output");
 
-let cellCount = 0;
+    output.textContent = "Running...";
 
-function createCell(code="") {
-  const cell = document.createElement("div");
-  cell.className = "cell";
-
-  cell.innerHTML = `
-    <textarea>${code}</textarea>
-    <button onclick="runCell(this)">Run</button>
-    <button onclick="this.parentElement.remove()">Delete</button>
-    <div class="output"></div>
-  `;
-  return cell;
-}
-
-function addCell(code="") {
-  const notebook = document.getElementById("notebook");
-  notebook.appendChild(createCell(code));
-  saveNotebook();
-}
-
-async function runCell(btn) {
-  const cell = btn.parentElement;
-  const code = cell.querySelector("textarea").value;
-  const out = cell.querySelector(".output");
-
-  out.textContent = "Running...";
-
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": API_KEY
-      },
-      body: JSON.stringify({ code })
-    });
-
-    let data;
     try {
-      data = await res.json();
-    } catch {
-      const text = await res.text();
-      out.textContent = "Non-JSON response:\n" + text;
-      return;
+        const response = await fetch("http://localhost:8000/run", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ code: code })
+        });
+
+        const data = await response.json();
+        output.textContent = data.output || JSON.stringify(data, null, 2);
+
+    } catch (err) {
+        output.textContent = "FETCH FAILED\n\n" + err;
     }
-
-    if (!res.ok) {
-      out.textContent =
-        "HTTP " + res.status + "\n\n" +
-        JSON.stringify(data, null, 2);
-      return;
-    }
-
-    out.innerHTML =
-      (data.stdout || "") +
-      (data.stderr ? `<div class="stderr">${data.stderr}</div>` : "");
-
-    addHistory(code);
-
-  } catch (err) {
-    out.textContent =
-      "FETCH FAILED\n\n" +
-      err.message +
-      "\n\nThis usually means:\n" +
-      "- CORS blocked\n" +
-      "- Wrong domain\n" +
-      "- API offline";
-  }
-
-  saveNotebook();
 }
-
-async function runAll() {
-  const cells = document.querySelectorAll(".cell button:first-of-type");
-  for (const btn of cells) {
-    await runCell(btn);
-  }
-}
-
-function addHistory(code) {
-  const hist = document.getElementById("history");
-  const div = document.createElement("div");
-  div.textContent = code.substring(0, 50);
-  hist.prepend(div);
-}
-
-function saveNotebook() {
-  const cells = [...document.querySelectorAll("textarea")]
-    .map(t => t.value);
-  localStorage.setItem("notebook", JSON.stringify(cells));
-}
-
-function loadNotebook() {
-  const data = localStorage.getItem("notebook");
-  if (!data) {
-    addCell();
-    return;
-  }
-
-  JSON.parse(data).forEach(code => addCell(code));
-}
-
-function exportNotebook() {
-  const data = localStorage.getItem("notebook");
-  const blob = new Blob([data], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "notebook.json";
-  a.click();
-}
-
-function importNotebook() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.onchange = e => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      localStorage.setItem("notebook", reader.result);
-      location.reload();
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
-function loadFile(event) {
-  const file = event.target.files[0];
-  const reader = new FileReader();
-  reader.onload = () => addCell(reader.result);
-  reader.readAsText(file);
-}
-
-document.addEventListener("DOMContentLoaded", loadNotebook);
 </script>
 
 </body>
