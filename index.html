@@ -4,9 +4,7 @@
   <meta charset="UTF-8" />
   <title>OroLabs Protolab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-  
   <style>
     :root {
       --bg-color: #121212;
@@ -22,260 +20,117 @@
     }
 
     body {
-      margin: 0;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
       background: var(--bg-color);
       color: var(--text-main);
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
+      display: flex; height: 100vh; overflow: hidden;
     }
 
-    /* Sidebar */
     .sidebar {
-      width: 60px;
-      background: var(--sidebar-bg);
+      width: 60px; background: var(--sidebar-bg);
       border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 20px;
-      gap: 20px;
+      display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 20px;
     }
 
-    .sidebar-icon {
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: color 0.2s;
-    }
+    .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 
-    .sidebar-icon:hover { color: var(--accent); }
-
-    /* Main Container */
-    .main-wrapper {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-
-    /* Topbar */
     .topbar {
-      background: var(--toolbar-bg);
-      padding: 8px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border-color);
-      height: 48px;
+      background: var(--toolbar-bg); padding: 8px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border-color); height: 48px;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 500;
-      color: var(--accent);
-    }
-
-    .toolbar-actions { display: flex; gap: 8px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--accent); }
 
     .btn {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 4px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      background: transparent; border: 1px solid var(--border-color);
+      color: var(--text-main); padding: 5px 12px; border-radius: 4px;
+      cursor: pointer; font-size: 13px; margin-left: 5px;
     }
 
-    .btn:hover { background: #303134; }
-    .btn-primary { background: var(--run-bg); border-color: var(--run-bg); color: white; }
-    .btn-primary:hover { background: #2ea043; }
+    .btn-primary { background: var(--run-bg); border: none; font-weight: bold; }
 
-    /* Notebook Area */
-    .notebook {
-      padding: 20px 10%;
-      flex: 1;
-    }
+    .notebook { padding: 20px 10%; flex: 1; }
 
     .cell {
-      position: relative;
-      margin-bottom: 24px;
-      border-radius: 8px;
-      background: var(--cell-bg);
-      border: 1px solid transparent;
-      transition: border 0.2s, box-shadow 0.2s;
-    }
-
-    .cell:hover, .cell:focus-within {
-      border-color: var(--border-color);
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    }
-
-    .cell-header {
-      display: flex;
+      margin-bottom: 20px; background: var(--cell-bg);
+      border-radius: 8px; border: 1px solid transparent;
       position: relative;
     }
+
+    .cell:hover { border-color: var(--border-color); }
+
+    .cell-header { display: flex; }
 
     .cell-gutter {
-      width: 50px;
-      padding-top: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      width: 50px; display: flex; flex-direction: column; align-items: center; padding-top: 15px;
     }
 
     .run-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 1px solid var(--border-color);
-      background: transparent;
-      color: var(--text-main);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
+      width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border-color);
+      background: #303134; color: white; cursor: pointer; transition: 0.2s;
     }
 
-    .run-btn:hover { background: var(--run-bg); color: white; border-color: var(--run-bg); }
+    .run-btn:hover { background: var(--run-bg); }
 
-    .execution-count {
-      font-family: monospace;
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
+    .editor-container { flex: 1; position: relative; padding: 10px 10px 10px 0; }
 
-    .editor-container {
-      flex: 1;
-      padding: 12px 12px 12px 0;
-      position: relative;
-    }
-
-    /* Overlapping Textarea and Code for Highlighting */
     .editor-container textarea, .editor-container pre {
-      margin: 0;
-      padding: 10px;
-      font-family: 'Fira Code', 'Consolas', monospace;
-      font-size: 14px;
-      line-height: 1.5;
-      min-height: 40px;
-      width: 100%;
-      box-sizing: border-box;
-      tab-size: 4;
+      margin: 0; padding: 10px; font-family: 'Consolas', monospace;
+      font-size: 14px; line-height: 1.5; width: 100%; box-sizing: border-box;
+      min-height: 50px; tab-size: 4;
     }
 
     .editor-container textarea {
-      background: transparent;
-      color: transparent;
-      caret-color: white;
-      border: none;
-      resize: none;
-      outline: none;
-      position: relative;
-      z-index: 2;
-      white-space: pre;
-      overflow: hidden;
+      background: transparent; color: transparent; caret-color: white;
+      border: none; resize: none; outline: none; position: relative; z-index: 2;
     }
 
     .editor-container pre {
-      position: absolute;
-      top: 12px;
-      left: 0;
-      z-index: 1;
-      pointer-events: none;
-      background: transparent !important;
+      position: absolute; top: 10px; left: 0; z-index: 1;
+      pointer-events: none; background: transparent !important;
     }
 
-    .cell-actions {
-      position: absolute;
-      top: -15px;
-      right: 10px;
-      background: var(--toolbar-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      display: none;
-      padding: 2px;
-      z-index: 10;
-    }
-
-    .cell:hover .cell-actions { display: flex; }
-
-    .action-icon {
-      padding: 4px 8px;
-      cursor: pointer;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .action-icon:hover { color: var(--accent); }
-
-    /* Output Section */
     .output-area {
-      background: #0d1117;
-      border-top: 1px solid var(--border-color);
-      padding: 12px 12px 12px 50px;
-      font-family: 'Consolas', monospace;
-      font-size: 13px;
-      display: none;
-      border-bottom-left-radius: 8px;
-      border-bottom-right-radius: 8px;
-      white-space: pre-wrap;
+      background: #0d1117; border-top: 1px solid var(--border-color);
+      padding: 10px 10px 10px 50px; font-family: monospace; font-size: 13px;
+      white-space: pre-wrap; display: none;
     }
 
     .output-area.visible { display: block; }
-    .output-area.error { color: var(--error-red); border-left: 4px solid var(--error-red); }
-    .output-area.success { border-left: 4px solid var(--run-bg); }
+    .output-area.error { color: var(--error-red); }
 
-    /* Status Bar */
     .status-bar {
-      height: 24px;
-      background: var(--accent);
-      color: #000;
-      font-size: 11px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-      justify-content: space-between;
+      height: 25px; background: #202124; border-top: 1px solid var(--border-color);
+      font-size: 11px; display: flex; align-items: center; padding: 0 20px; gap: 20px;
     }
+
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .online { background: #34a853; }
+    .offline { background: #ea4335; }
   </style>
 </head>
 <body>
 
 <div class="sidebar">
-  <div class="sidebar-icon" title="Files">📁</div>
-  <div class="sidebar-icon" title="Variables">📊</div>
-  <div class="sidebar-icon" title="Settings">⚙️</div>
+  <span>📁</span><span>⚙️</span>
 </div>
 
 <div class="main-wrapper">
   <div class="topbar">
-    <div class="brand">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-      OroLabs Protolab
-    </div>
+    <div class="brand">OroLabs Protolab</div>
     <div class="toolbar-actions">
       <button class="btn" onclick="addCodeCell()">+ Code</button>
-      <button class="btn" onclick="clearAllOutputs()">Clear Outputs</button>
-      <button class="btn" onclick="downloadAsPython()">Download .py</button>
       <button class="btn btn-primary" onclick="runAllCells()">Run All</button>
     </div>
   </div>
 
-  <div class="notebook" id="notebook">
-    </div>
+  <div class="notebook" id="notebook"></div>
 
   <div class="status-bar">
-    <span>RAM: 0.45GB / 12.69GB</span>
-    <span>Connected: localhost:8000</span>
+    <span id="connection-status"><span class="status-dot offline"></span> Checking backend...</span>
+    <span>Host: 127.0.0.1:8000</span>
   </div>
 </div>
 
@@ -283,172 +138,91 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
 
 <script>
-const API_URL = "http://localhost:8000/run";
+// FIXED: Using 127.0.0.1 instead of localhost for better browser compatibility
+const API_URL = "http://127.0.0.1:8000/run";
+const HEALTH_URL = "http://127.0.0.1:8000/health";
 const API_KEY = "dev-secret";
-let executionCounter = 1;
 
-// --- Persistence ---
-function saveNotebook() {
-  const cells = [];
-  document.querySelectorAll('.cell').forEach(cell => {
-    cells.push(cell.querySelector('textarea').value);
-  });
-  localStorage.setItem('protolab_cells', JSON.stringify(cells));
+async function checkHealth() {
+    const statusEl = document.getElementById('connection-status');
+    try {
+        const res = await fetch(HEALTH_URL);
+        if (res.ok) statusEl.innerHTML = '<span class="status-dot online"></span> Connected to Backend';
+    } catch (e) {
+        statusEl.innerHTML = '<span class="status-dot offline"></span> Backend Offline';
+    }
 }
 
-function loadNotebook() {
-  const saved = localStorage.getItem('protolab_cells');
-  if (saved) {
-    const cells = JSON.parse(saved);
-    cells.forEach(code => addCodeCell(code));
-  } else {
-    addCodeCell('print("Welcome to OroLabs Protolab!")\n# Shift + Enter to run');
-  }
-}
-
-// --- Cell Creation ---
-function addCodeCell(initialCode = "") {
-  const container = document.getElementById('notebook');
-  const cell = document.createElement('div');
-  cell.className = 'cell';
-  
-  cell.innerHTML = `
-    <div class="cell-actions">
-      <span class="action-icon" onclick="moveCell(this, -1)">▲</span>
-      <span class="action-icon" onclick="moveCell(this, 1)">▼</span>
-      <span class="action-icon" onclick="this.closest('.cell').remove(); saveNotebook();">🗑️</span>
-    </div>
-    <div class="cell-header">
-      <div class="cell-gutter">
-        <button class="run-btn" onclick="runSingleCell(this.closest('.cell'))">▶</button>
-        <div class="execution-count">[ ]</div>
-      </div>
-      <div class="editor-container">
-        <textarea spellcheck="false" oninput="updateEditor(this)">${initialCode}</textarea>
-        <pre aria-hidden="true"><code class="language-python">${initialCode}</code></pre>
-      </div>
-    </div>
-    <div class="output-area"></div>
-  `;
-
-  container.appendChild(cell);
-  const textarea = cell.querySelector('textarea');
-  updateEditor(textarea);
-  
-  // Keyboard Shortcuts
-  textarea.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && e.shiftKey) {
-      e.preventDefault();
-      runSingleCell(cell);
-    }
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      const start = this.selectionStart;
-      this.value = this.value.substring(0, start) + "    " + this.value.substring(this.selectionEnd);
-      this.selectionStart = this.selectionEnd = start + 4;
-      updateEditor(this);
-    }
-  });
-
-  saveNotebook();
+function addCodeCell(code = "print('Hello Protolab')") {
+    const notebook = document.getElementById('notebook');
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.innerHTML = `
+        <div class="cell-header">
+            <div class="cell-gutter">
+                <button class="run-btn" onclick="runSingleCell(this.closest('.cell'))">▶</button>
+                <div style="font-size:10px; color:#999; margin-top:5px">[ ]</div>
+            </div>
+            <div class="editor-container">
+                <textarea spellcheck="false" oninput="updateEditor(this)">${code}</textarea>
+                <pre aria-hidden="true"><code class="language-python">${code}</code></pre>
+            </div>
+        </div>
+        <div class="output-area"></div>
+    `;
+    notebook.appendChild(cell);
+    updateEditor(cell.querySelector('textarea'));
 }
 
 function updateEditor(el) {
-  const code = el.value;
-  const pre = el.nextElementSibling;
-  const codeEl = pre.querySelector('code');
-  
-  // Update highlighting
-  codeEl.textContent = code + (code.endsWith('\n') ? ' ' : '');
-  Prism.highlightElement(codeEl);
-  
-  // Match heights
-  el.style.height = 'auto';
-  el.style.height = el.scrollHeight + 'px';
-  pre.style.height = el.scrollHeight + 'px';
-  
-  saveNotebook();
+    const code = el.value;
+    const pre = el.nextElementSibling;
+    const codeEl = pre.querySelector('code');
+    codeEl.textContent = code + (code.endsWith('\n') ? ' ' : '');
+    Prism.highlightElement(codeEl);
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+    pre.style.height = el.scrollHeight + 'px';
 }
 
-// --- API Execution ---
 async function runSingleCell(cell) {
-  const code = cell.querySelector('textarea').value;
-  const output = cell.querySelector('.output-area');
-  const counter = cell.querySelector('.execution-count');
-  
-  if (!code.trim()) return;
+    const code = cell.querySelector('textarea').value;
+    const output = cell.querySelector('.output-area');
+    output.className = 'output-area visible';
+    output.textContent = 'Running...';
 
-  output.className = 'output-area visible';
-  output.textContent = 'Executing...';
-  counter.textContent = '[*]';
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "x-api-key": API_KEY 
+            },
+            body: JSON.stringify({ code: code })
+        });
 
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": API_KEY
-      },
-      body: JSON.stringify({ code: code })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.detail || 'Server Error');
-
-    if (data.stderr) {
-      output.classList.add('error');
-      output.textContent = data.stderr;
-    } else {
-      output.classList.add('success');
-      output.textContent = data.stdout || '(No output)';
+        const data = await res.json();
+        if (data.stderr) {
+            output.classList.add('error');
+            output.textContent = data.stderr;
+        } else {
+            output.classList.remove('error');
+            output.textContent = data.stdout || '(No output)';
+        }
+    } catch (err) {
+        output.classList.add('error');
+        output.textContent = "FAILED TO FETCH: Is the Python script running on 127.0.0.1:8000?";
     }
-  } catch (err) {
-    output.classList.add('error');
-    output.textContent = `Error: ${err.message}`;
-  } finally {
-    counter.textContent = `[${executionCounter++}]`;
-  }
 }
 
 async function runAllCells() {
-  const cells = document.querySelectorAll('.cell');
-  for (const cell of cells) {
-    await runSingleCell(cell);
-  }
+    for (const cell of document.querySelectorAll('.cell')) await runSingleCell(cell);
 }
 
-function clearAllOutputs() {
-  document.querySelectorAll('.output-area').forEach(out => {
-    out.className = 'output-area';
-    out.textContent = '';
-  });
-}
-
-function downloadAsPython() {
-  let content = "# OroLabs Protolab Export\n\n";
-  document.querySelectorAll('textarea').forEach(tx => content += tx.value + "\n\n");
-  const blob = new Blob([content], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'notebook.py';
-  a.click();
-}
-
-function moveCell(btn, direction) {
-  const cell = btn.closest('.cell');
-  if (direction === -1 && cell.previousElementSibling) {
-    cell.parentNode.insertBefore(cell, cell.previousElementSibling);
-  } else if (direction === 1 && cell.nextElementSibling) {
-    cell.parentNode.insertBefore(cell.nextElementSibling, cell);
-  }
-  saveNotebook();
-}
-
-// Initialize
-document.addEventListener('DOMContentLoaded', loadNotebook);
+document.addEventListener('DOMContentLoaded', () => {
+    checkHealth();
+    addCodeCell();
+});
 </script>
-
 </body>
 </html>
